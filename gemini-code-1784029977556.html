@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay Tracker</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 350px; }
+        h2 { text-align: center; color: #333; margin-top: 0; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 10px; }
+        .add-btn { background-color: #38a169; color: white; }
+        .reset-btn { background-color: #e53e3e; color: white; margin-top: 10px; }
+        .stats { margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #2d3748; }
+        .stat-label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Pay Tracker</h2>
+    
+    <div class="input-group">
+        <label>Add Hours to Work</label>
+        <input type="number" id="add-hours" value="0" min="0">
+    </div>
+    <div class="input-group">
+        <label>Add Minutes to Work</label>
+        <input type="number" id="add-minutes" value="0" min="0">
+    </div>
+    
+    <button class="add-btn" onclick="addToTotal()">Add Time</button>
+    <button class="reset-btn" onclick="resetData()">Reset All</button>
+
+    <div class="stats">
+        <div class="stat-label">Total Time Worked</div>
+        <div class="stat-value" id="total-time">0h 0m</div>
+        <div class="stat-label" style="margin-top:15px">Total Pay So Far</div>
+        <div class="stat-value" style="color: #3182ce" id="total-pay">£0.00</div>
+    </div>
+</div>
+
+<script>
+    const RATE = 8;
+
+    // Load data on startup
+    window.onload = updateDisplay;
+
+    function addToTotal() {
+        // Get values
+        let h = parseFloat(document.getElementById('add-hours').value) || 0;
+        let m = parseFloat(document.getElementById('add-minutes').value) || 0;
+        
+        // Convert input to minutes and add to storage
+        let newMinutes = (h * 60) + m;
+        let currentTotal = parseFloat(localStorage.getItem('totalMinutes')) || 0;
+        let newTotal = currentTotal + newMinutes;
+        
+        localStorage.setItem('totalMinutes', newTotal);
+        
+        // Reset inputs to 0
+        document.getElementById('add-hours').value = 0;
+        document.getElementById('add-minutes').value = 0;
+        
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        let totalMins = parseFloat(localStorage.getItem('totalMinutes')) || 0;
+        
+        // Convert back to Hours/Minutes display
+        let hours = Math.floor(totalMins / 60);
+        let mins = Math.round(totalMins % 60);
+        
+        // Calculate Pay
+        let pay = (totalMins / 60) * RATE;
+        
+        document.getElementById('total-time').innerText = `${hours}h ${mins}m`;
+        document.getElementById('total-pay').innerText = `£${pay.toFixed(2)}`;
+    }
+
+    function resetData() {
+        if(confirm("Are you sure you want to reset your total?")) {
+            localStorage.setItem('totalMinutes', 0);
+            updateDisplay();
+        }
+    }
+</script>
+
+</body>
+</html>
