@@ -3,90 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pay Tracker</title>
+    <title>Earnings & Shift Tracker</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 350px; }
-        h2 { text-align: center; color: #333; margin-top: 0; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 13px; color: #666; margin-bottom: 5px; }
-        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 10px; }
-        .add-btn { background-color: #38a169; color: white; }
-        .reset-btn { background-color: #e53e3e; color: white; margin-top: 10px; }
-        .stats { margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; }
-        .stat-value { font-size: 24px; font-weight: bold; color: #2d3748; }
-        .stat-label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 1px; }
+        :root {
+            --primary: #3182ce;
+            --primary-hover: #2b6cb0;
+            --success: #38a169;
+            --success-hover: #2f855a;
+            --danger: #e53e3e;
+            --danger-hover: #c53030;
+            --background: #f7fafc;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .app-container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        h2 { text-align: center; margin-top: 0; font-size: 24px; color: var(--text-main); }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-box { text-align: center; }
+        .stat-box:first-child { border-right: 1px solid var(--border); }
+        .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 4px; }
+        .stat-value { font-size: 22px; font-weight: 700; color: var(--text-main); }
+        
+        .input-row { display: flex; gap: 12px; margin-bottom: 15px; }
+        .input-group { flex: 1; }
+        label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+        
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: #fff;
+        }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-add { background: var(--success); color: white; }
+        .btn-add:hover { background: var(--success-hover); transform: translateY(-1px); }
+        .btn-add:active { transform: translateY(0); }
+        
+        .history-section { margin-top: 25px; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+        .history-title { font-size: 14px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .btn-clear-all { background: none; color: var(--danger); font-size: 12px; width: auto; padding: 0; margin: 0; font-weight: 500; }
+        .btn-clear-all:hover { color: var(--danger-hover); text-decoration: underline; }
+
+        .history-list { max-height: 180px; overflow-y: auto; padding-right: 5px; list-style: none; padding-left: 0; margin: 0; }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+        .item-details { display: flex; flex-direction: column; }
+        .item-date { font-size: 11px; color: var(--text-muted); }
+        .btn-delete-item { background: none; color: var(--text-muted); width: auto; padding: 4px 8px; font-size: 14px; border-radius: 4px; }
+        .btn-delete-item:hover { color: var(--danger); background: #fff5f5; }
+
+        .empty-state { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px 0; font-style: italic; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Pay Tracker</h2>
+<div class="app-container">
+    <h2>Earnings Tracker</h2>
     
-    <div class="input-group">
-        <label>Add Hours to Work</label>
-        <input type="number" id="add-hours" value="0" min="0">
-    </div>
-    <div class="input-group">
-        <label>Add Minutes to Work</label>
-        <input type="number" id="add-minutes" value="0" min="0">
+    <!-- Stats Breakdown -->
+    <div class="dashboard-grid">
+        <div class="stat-box">
+            <div class="stat-label">Hours Logged</div>
+            <div class="stat-value" id="total-time">0h 0m</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Total Earnings</div>
+            <div class="stat-value" style="color: var(--primary)" id="total-pay">£0.00</div>
+        </div>
     </div>
     
-    <button class="add-btn" onclick="addToTotal()">Add Time</button>
-    <button class="reset-btn" onclick="resetData()">Reset All</button>
+    <!-- Rate configuration -->
+    <div class="input-row">
+        <div class="input-group">
+            <label for="rate">Hourly Rate (£)</label>
+            <input type="number" id="rate" value="8.00" min="0" step="0.50" onchange="updateDashboard()">
+        </div>
+    </div>
 
-    <div class="stats">
-        <div class="stat-label">Total Time Worked</div>
-        <div class="stat-value" id="total-time">0h 0m</div>
-        <div class="stat-label" style="margin-top:15px">Total Pay So Far</div>
-        <div class="stat-value" style="color: #3182ce" id="total-pay">£0.00</div>
+    <!-- Log entry forms -->
+    <div class="input-row">
+        <div class="input-group">
+            <label for="add-hours">Hours</label>
+            <input type="number" id="add-hours" value="0" min="0" placeholder="0">
+        </div>
+        <div class="input-group">
+            <label for="add-minutes">Minutes</label>
+            <input type="number" id="add-minutes" value="0" min="0" max="59" placeholder="0">
+        </div>
+    </div>
+    
+    <button class="btn-add" onclick="addShift()">Log Shift Time</button>
+
+    <!-- Shift Records -->
+    <div class="history-section">
+        <div class="history-header">
+            <div class="history-title">Shift Log History</div>
+            <button class="btn-clear-all" onclick="resetAll()">Reset All</button>
+        </div>
+        <ul class="history-list" id="history-list">
+            <!-- Injected by JS -->
+        </ul>
     </div>
 </div>
 
 <script>
-    const RATE = 8;
-
-    // Load data on startup
-    window.onload = updateDisplay;
-
-    function addToTotal() {
-        // Get values
-        let h = parseFloat(document.getElementById('add-hours').value) || 0;
-        let m = parseFloat(document.getElementById('add-minutes').value) || 0;
-        
-        // Convert input to minutes and add to storage
-        let newMinutes = (h * 60) + m;
-        let currentTotal = parseFloat(localStorage.getItem('totalMinutes')) || 0;
-        let newTotal = currentTotal + newMinutes;
-        
-        localStorage.setItem('totalMinutes', newTotal);
-        
-        // Reset inputs to 0
-        document.getElementById('add-hours').value = 0;
-        document.getElementById('add-minutes').value = 0;
-        
-        updateDisplay();
+    let shifts = JSON.parse(localStorage.getItem('shiftLogs')) || [];
+    
+    if(localStorage.getItem('hourlyRate')) {
+        document.getElementById('rate').value = localStorage.getItem('hourlyRate');
     }
 
-    function updateDisplay() {
-        let totalMins = parseFloat(localStorage.getItem('totalMinutes')) || 0;
+    window.onload = updateDashboard;
+
+    function addShift() {
+        let hInput = document.getElementById('add-hours');
+        let mInput = document.getElementById('add-minutes');
         
-        // Convert back to Hours/Minutes display
-        let hours = Math.floor(totalMins / 60);
-        let mins = Math.round(totalMins % 60);
+        let h = parseInt(hInput.value) || 0;
+        let m = parseInt(mInput.value) || 0;
         
-        // Calculate Pay
-        let pay = (totalMins / 60) * RATE;
+        if (h === 0 && m === 0) return;
+
+        let newShift = {
+            id: Date.now(),
+            hours: h,
+            minutes: m,
+            date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' })
+        };
+
+        shifts.push(newShift);
+        saveToStorage();
         
-        document.getElementById('total-time').innerText = `${hours}h ${mins}m`;
-        document.getElementById('total-pay').innerText = `£${pay.toFixed(2)}`;
+        hInput.value = 0;
+        mInput.value = 0;
+        
+        updateDashboard();
     }
 
-    function resetData() {
-        if(confirm("Are you sure you want to reset your total?")) {
-            localStorage.setItem('totalMinutes', 0);
-            updateDisplay();
+    function deleteShift(id) {
+        shifts = shifts.filter(shift => shift.id !== id);
+        saveToStorage();
+        updateDashboard();
+    }
+
+    function saveToStorage() {
+        localStorage.setItem('shiftLogs', JSON.stringify(shifts));
+        localStorage.setItem('hourlyRate', document.getElementById('rate').value);
+    }
+
+    function updateDashboard() {
+        let listContainer = document.getElementById('history-list');
+        listContainer.innerHTML = '';
+        
+        let totalMinutes = 0;
+        let currentRate = parseFloat(document.getElementById('rate').value) || 0;
+        localStorage.setItem('hourlyRate', currentRate);
+
+        if(shifts.length === 0) {
+            listContainer.innerHTML = '<li class="empty-state">No shifts logged yet.</li>';
+        } else {
+            shifts.forEach(shift => {
+                totalMinutes += (shift.hours * 60) + shift.minutes;
+                
+                let li = document.createElement('li');
+                li.className = 'history-item';
+                li.innerHTML = `
+                    <div class="item-details">
+                        <strong>+ ${shift.hours}h ${shift.minutes}m</strong>
+                        <span class="item-date">${shift.date}</span>
+                    </div>
+                    <button class="btn-delete-item" onclick="deleteShift(${shift.id})">✕</button>
+                `;
+                listContainer.appendChild(li);
+            });
+        }
+
+        let displayHours = Math.floor(totalMinutes / 60);
+        let displayMins = totalMinutes % 60;
+        let displayPay = (totalMinutes / 60) * currentRate;
+
+        document.getElementById('total-time').innerText = `${displayHours}h ${displayMins}m`;
+        document.getElementById('total-pay').innerText = `£${displayPay.toFixed(2)}`;
+    }
+
+    function resetAll() {
+        if(confirm("Are you sure you want to permanently delete all shift history?")) {
+            shifts = [];
+            saveToStorage();
+            updateDashboard();
         }
     }
 </script>
